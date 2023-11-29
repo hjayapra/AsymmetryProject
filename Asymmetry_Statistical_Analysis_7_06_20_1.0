@@ -1,0 +1,230 @@
+
+#Hippocampal Asymmetry distribution with respect to pred var 
+#Statistical Analysis 
+#7-05-2020 
+ 
+library(ggplot2)
+
+#age, sex, APOE, race (binary), education (binary), MMS, GDS, FDG_global, PiB_global (binary), ICV
+#Excluded MMS 
+#Ecluded GDS? 
+
+#load Data and Filter 
+
+AsymmData <- read.table("C:/Users/remov/Documents/KLU_APC2_Master_List_p012.csv", header = TRUE, sep = ",")
+AsymmData <- AsymmData[which(AsymmData$Visit_Relative == 1),]
+
+################################################################################################
+#Define Predictor Variables 
+
+
+AsymmData$Education_cat <- AsymmData$Education >12
+
+AsymmData$Race_cat <- AsymmData$Race != "White"
+
+AsymmData$Sex <- AsymmData$Sex
+
+AsymmData$APOE_CODE[AsymmData$APOE_CODE == "NaN"] = NA
+
+AsymmData$PiBStatus_SUVR_GTM_FS_Global[AsymmData$PiBStatus_SUVR_GTM_FS_Global== "NaN"] = NA
+
+################################################################################################
+#Conduct Regression 
+
+#linear model 
+mdl1 <- lm(FS_Asymm_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_Global + PiBStatus_SUVR_GTM_FS_Global + APOE_CODE + FS_IntraCranialVol, data = AsymmData)
+summary(mdl)
+
+#plot mdl1 
+plot(mdl1)
+
+#FDG shows greater association with FS_Asymm_Hippocampus
+plot(FS_Asymm_Hippocampus~FDG_SUVR_GTM_FS_Global, data = AsymmData)
+
+#########################################################################
+#Conduct Regression 2
+
+#Absolute Val FS_Asymm_Hippocampus 
+AsymmData$Abs_FS_Asymm_Hippocampus <- abs(AsymmData$FS_Asymm_Hippocampus)
+
+#linear model 
+mdl2 <- lm(Abs_FS_Asymm_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_Global + PiBStatus_SUVR_GTM_FS_Global + APOE_CODE+ FS_IntraCranialVol, data = AsymmData)
+
+#Summary 
+summary(mdl2)
+
+    
+#plot mdl2
+plot(mdl2)
+
+#FDG shows correlation with Abs_FS_Asymm_Hippocampus 
+plot(Abs_FS_Asymm_Hippocampus~FDG_SUVR_GTM_FS_Global, data = AsymmData)
+
+#########################################################################
+#Conduct Regression 3
+
+#Left Hippocampus Outcome Variable 
+#FS_Left_Hippocampus 
+
+#Linear Model 
+mdl3 <- lm(FS_Left_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_Global + PiBStatus_SUVR_GTM_FS_Global + APOE_CODE +FS_IntraCranialVol, data = AsymmData)
+
+#Summary 
+summary(mdl3) #Education stronger association 
+
+#plot mdl3 
+plot(mdl3)
+
+
+#Age shows significant correlation with Left Hippocampus Vol 
+plot(FS_Left_Hippocampus~Age_CurrentVisit, data = AsymmData, pch = 19 , main = "LEFT HIPPOCAMPUS VOLUME AGAINST CURRENT VISIT AGE")
+
+#Race shows significant correlation with Left Hippocampus Vol 
+#Left_Hippocampus_Race + theme_bw()+ stat_summary(fun.data = "mean_sdl",  fun.args = list(mult = 1), geom = "crossbar", color = "black")+ geom_boxplot(width = 0.2)
+
+Left_Hippocampus_Race <- ggplot(AsymmData, aes(x = Race_cat, y = FS_Left_Hippocampus)) + geom_violin(trim = FALSE, fill = "#56B4E9")
+Left_Hippocampus_Race + stat_summary(fun.data = data_summary) + geom_boxplot(width = 0.1)
+
+data_summary <- function(x) {
+   m <- mean(x)
+   ymin <- m-sd(x)
+   ymax <- m+sd(x)
+   return(c(y=m,ymin=ymin,ymax=ymax))
+}
+
+
+#########################################################################
+#Conduct Regression 4
+
+#Right Hippocampus Outcome Variable 
+#FS_Right_Hippocampus 
+
+#Linear Model 
+mdl4 <- lm(FS_Right_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_Global + PiBStatus_SUVR_GTM_FS_Global + APOE_CODE + FS_IntraCranialVol, data = AsymmData)
+
+#Summary 
+summary(mdl4)
+
+#plot mdl4 
+plot(mdl4) 
+
+#FDG shows positive correlation with Right_Hippocampus
+plot(FS_Right_Hippocampus~FDG_SUVR_GTM_FS_Global, data = AsymmData, pch = 19 , main = "LEFT HIPPOCAMPUS VOLUME AGAINST GLOBAL FDG")
+
+
+#Right Hippocampus against race 
+
+Right_Hippocampus_Race <- ggplot(AsymmData, aes(x = Race_cat, y = FS_Right_Hippocampus)) + geom_violin(trim = FALSE, fill = "#56B4E9")
+Right_Hippocampus_Race + stat_summary(fun.data = data_summary) + geom_boxplot(width = 0.1)
+
+data_summary <- function(x) {
+   m <- mean(x)
+   ymin <- m-sd(x)
+   ymax <- m+sd(x)
+   return(c(y=m,ymin=ymin,ymax=ymax))
+}
+
+
+#Right Hippocampus against Age shows a negative correlation between R Hippocampus Vol and Age 
+
+plot(FS_Right_Hippocampus~Age_CurrentVisit, data = AsymmData, pch = 19, main = "Right Hippocampus Volume against Current Visit Age") 
+
+
+#########################################################################
+#Conduct Regression 5
+
+#FDG and PiB predictor var
+AsymmData$FDG_SUVR_GTM_FS_LateralTemporal <- AsymmData$FDG_SUVR_GTM_FS_LateralTemporal
+AsymmData$PiB_SUVR_GTM_FS_LateralTemporal_cat <- AsymmData$PiB_SUVR_GTM_FS_LateralTemporal > 1.570 
+
+#Linear Model 
+mdl5 <- lm(FS_Asymm_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_LateralTemporal + PiB_SUVR_GTM_FS_LateralTemporal_cat + APOE_CODE + FS_IntraCranialVol, data = AsymmData)
+
+#Summary 
+summary(mdl5)
+
+#plot mdl5 
+plot(mdl5)
+
+#Age shows significant correlation FS_Asymm_Hippocampus 
+plot(FS_Asymm_Hippocampus~Age_CurrentVisit, data = AsymmData)
+
+#FDG shows greater significant correlation FS_Asymm_Hippocampus 
+plot(FS_Asymm_Hippocampus~FDG_SUVR_GTM_FS_LateralTemporal, data = AsymmData)
+
+#########################################################################
+#Conduct Regression 6 
+
+#Absolute Val FS_Asymm_Hippocampus
+
+#Linear Model 
+mdl6 <- lm(Abs_FS_Asymm_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_LateralTemporal + PiB_SUVR_GTM_FS_LateralTemporal_cat + APOE_CODE + FS_IntraCranialVol, data = AsymmData)
+
+#Summary 
+summary(mdl6)
+
+#plot mdl6 
+plot(mdl6) 
+
+#FDG is correlated with Abs_FS_Asymm_Hippocampus 
+plot(Abs_FS_Asymm_Hippocampus~FDG_SUVR_GTM_FS_LateralTemporal, data = AsymmData)
+
+#########################################################################
+#Conduct Regression 7
+
+#Left Hippocampus Outcome Variable 
+#FS_Left_Hippocampus 
+
+#Linear Model 
+mdl7 <- lm(FS_Left_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_LateralTemporal + PiB_SUVR_GTM_FS_LateralTemporal_cat + APOE_CODE + FS_IntraCranialVol, data = AsymmData)
+
+#Summary 
+summary(mdl7)
+
+#plot mdl7 
+plot(mdl7) 
+
+#Race shows a correlation with Left Hippocampus Vol 
+Left_Hippocampus_Race_2 <- ggplot(AsymmData, aes(x = Race_cat, y = FS_Left_Hippocampus)) + geom_violin(trim = FALSE, fill = "#56B4E9")
+Left_Hippocampus_Race_2 + stat_summary(fun.data = data_summary) + geom_boxplot(width = 0.1)
+
+data_summary <- function(x) {
+   m <- mean(x)
+   ymin <- m-sd(x)
+   ymax <- m+sd(x)
+   return(c(y=m,ymin=ymin,ymax=ymax))
+}
+
+#Age shows a strong negative correlation with Left Hippocampus Vol 
+plot(FS_Left_Hippocampus~Age_CurrentVisit, data = AsymmData, pch = 19, main = "LEFT HIPPOCAMPUS VOLUME AGAINST CURRENT VISIT AGE")
+
+
+#########################################################################
+#Conduct Regression 8 
+
+#Right Hippocampus Outcome Variable 
+#FS_Right_Hippocampus
+
+#Linear Model 
+mdl8 <- lm(FS_Right_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_LateralTemporal + PiB_SUVR_GTM_FS_LateralTemporal_cat + APOE_CODE + FS_IntraCranialVol, data = AsymmData)
+
+#Summary 
+summary(mdl8)
+
+#plot mdl8 
+plot(mdl8) 
+
+#FDG shows a correlation with FS_Right_Hippocampus Vol 
+plot(FS_Right_Hippocampus~FDG_SUVR_GTM_FS_LateralTemporal, data = AsymmData)
+
+#Race shows correlation with FS_Right_Hippocampus Vol 
+Left_Hippocampus_Race_2 <- ggplot(AsymmData, aes(x = Race_cat, y = FS_Left_Hippocampus)) + geom_violin(trim = FALSE)
+Left_Hippocampus_Race_2 + theme_bw()+ stat_summary(fun.data = "mean_sdl",  fun.args = list(mult = 1), geom = "crossbar", color = "black")
+
+
+#Age shows correlation with FS_Right_Hippocampus Vol 
+plot(FS_Right_Hippocampus~Age_CurrentVisit, data = AsymmData) 
+#########################################################################
+
+
+

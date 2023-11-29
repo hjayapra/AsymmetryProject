@@ -1,0 +1,35 @@
+
+#Hippocampal Asymmetry distribution with respect to pred var 
+#Statistical Analysis 
+#6-23-2020 
+ 
+library(ggplot2)
+
+#load Data and Filter 
+
+AsymmData <- read.table("C:/Users/remov/Documents/KLU_APC2_Master_List_p012.csv", header = TRUE, sep = ",")
+AsymmData <- AsymmData[which(AsymmData$Visit_Relative == 1),]
+
+#Conduct Regression 
+
+
+AsymmData$Education_cat <- AsymmData$Education >12
+
+AsymmData$Race_cat <- AsymmData$Race != "White"
+
+#linear model 
+mdl <- lm(FS_Asymm_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat, data = AsymmData)
+
+#plot mdl 
+
+plot(mdl)
+
+#Plot Asymm_Education Linear Regression <- violin plot (ggplot)  
+
+Asymm_Education <- ggplot(AsymmData, aes(x = Education_cat, y= FS_Asymm_Hippocampus)) + geom_violin()
+Asymm_Education + theme_bw()
+
+#plot Asymm_Race_cat 
+
+
+

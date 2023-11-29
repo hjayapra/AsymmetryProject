@@ -1,0 +1,50 @@
+
+#Hippocampal Asymmetry distribution with respect to pred var 
+#Statistical Analysis 
+#7-05-2020 
+ 
+library(ggplot2)
+
+#Excluded MMS 
+#Excluded APOE 
+
+#load Data and Filter 
+
+AsymmData <- read.table("C:/Users/remov/Documents/KLU_APC2_Master_List_p012.csv", header = TRUE, sep = ",")
+AsymmData <- AsymmData[which(AsymmData$Visit_Relative == 1),]
+
+#Conduct Regression 
+
+
+AsymmData$Education_cat <- AsymmData$Education >12
+
+AsymmData$Race_cat <- AsymmData$Race != "White"
+
+AsymmData$Sex <- AsymmData$Sex
+
+#linear model 
+mdl <- lm(FS_Asymm_Hippocampus~Age_CurrentVisit + Sex + Education_cat + Race_cat + FDG_SUVR_GTM_FS_Global,  data = AsymmData)
+
+#plot mdl 
+
+plot(mdl)
+
+#Plot Asymm_Education Linear Regression <- violin plot (ggplot)  
+
+Asymm_Education <- ggplot(AsymmData, aes(x = Education_cat, y= FS_Asymm_Hippocampus)) + geom_violin(trim = FALSE)
+Asymm_Education + theme_bw()+ stat_summary(fun.data = "mean_sdl",  fun.args = list(mult = 1), geom = "crossbar", color = "black")
+#plot Asymm_Race_cat 
+
+
+Asymm_Race <- ggplot(AsymmData, aes(x = Race_cat, y= FS_Asymm_Hippocampus)) + geom_violin(trim = FALSE)
+Asymm_Race + theme_bw()+ geom_boxplot(width=0.1)
+
+#plot Asymm_Sex 
+
+
+Asymm_Sex <- ggplot(AsymmData, aes(x = Sex, y= FS_Asymm_Hippocampus)) + geom_violin(trim = FALSE)
+Asymm_Sex + theme_bw()+ geom_boxplot(width=0.1)
+
+
+
+
